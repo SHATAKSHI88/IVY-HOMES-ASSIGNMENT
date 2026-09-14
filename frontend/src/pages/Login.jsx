@@ -30,7 +30,10 @@ const Login = () => {
       const destination = location.state?.from || "/listings";
       navigate(destination, { replace: true });
     } catch (err) {
-      setError(err.message || "We couldn't sign you in. Check your details and try again.");
+      setError(
+        err.message ||
+          "We couldn't sign you in. Check your details and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -40,7 +43,6 @@ const Login = () => {
     <div className="login-page">
       <div className="login-shell">
 
-        {/* ================= FORM PANEL ================= */}
         <div className="login-form-panel">
           <div className="login-form-inner">
 
@@ -54,19 +56,29 @@ const Login = () => {
 
             <div className="login-heading">
               <h1>Welcome back</h1>
-              <p>Sign in to explore properties, rentals and market insights.</p>
+              <p>
+                Sign in to explore properties, rentals and market insights.
+              </p>
             </div>
 
-            <form className="login-form" onSubmit={handleSubmit} noValidate>
+            <form
+              className="login-form"
+              onSubmit={handleSubmit}
+              noValidate
+            >
               <div className="login-field">
                 <label htmlFor="email">Email address</label>
+
                 <input
                   id="email"
                   type="email"
                   autoComplete="email"
                   placeholder="you@company.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError("");
+                  }}
                   disabled={loading}
                   autoFocus
                   required
@@ -76,7 +88,12 @@ const Login = () => {
               <div className="login-field">
                 <div className="login-field-row">
                   <label htmlFor="password">Password</label>
-                  <button type="button" className="login-forgot" tabIndex={-1}>
+
+                  <button
+                    type="button"
+                    className="login-forgot"
+                    tabIndex={-1}
+                  >
                     Forgot password?
                   </button>
                 </div>
@@ -88,7 +105,10 @@ const Login = () => {
                     autoComplete="current-password"
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError("");
+                    }}
                     disabled={loading}
                     required
                   />
@@ -96,18 +116,47 @@ const Login = () => {
                   <button
                     type="button"
                     className="login-password-toggle"
-                    onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowPassword((value) => !value)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     aria-pressed={showPassword}
                   >
                     {showPassword ? (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M6.6 6.7C4.5 8.1 3 10 2 12c1.8 3.6 5.5 7 10 7 1.6 0 3.1-.4 4.5-1.1M9.9 5.1A10.8 10.8 0 0112 5c4.5 0 8.2 3.4 10 7-.6 1.2-1.4 2.4-2.4 3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M6.6 6.7C4.5 8.1 3 10 2 12c1.8 3.6 5.5 7 10 7 1.6 0 3.1-.4 4.5-1.1M9.9 5.1A10.8 10.8 0 0112 5c4.5 0 8.2 3.4 10 7-.6 1.2-1.4 2.4-2.4 3.5"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M2 12c1.8-3.6 5.5-7 10-7s8.2 3.4 10 7c-1.8 3.6-5.5 7-10 7s-8.2-3.4-10-7z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-                        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M2 12c1.8-3.6 5.5-7 10-7s8.2 3.4 10 7c-1.8 3.6-5.5 7-10 7s-8.2-3.4-10-7z"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinejoin="round"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="3"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                        />
                       </svg>
                     )}
                   </button>
@@ -121,7 +170,11 @@ const Login = () => {
                 </div>
               )}
 
-              <button type="submit" className="login-submit" disabled={loading}>
+              <button
+                type="submit"
+                className="login-submit"
+                disabled={loading}
+              >
                 {loading ? (
                   <>
                     <span className="login-spinner" />
@@ -140,10 +193,11 @@ const Login = () => {
           </div>
         </div>
 
-        {/* ================= DECORATIVE PANEL ================= */}
         <div className="login-visual" aria-hidden="true">
           <div className="login-visual-inner">
-            <p className="eyebrow login-visual-eyebrow">Market intelligence</p>
+            <p className="eyebrow login-visual-eyebrow">
+              Market intelligence
+            </p>
 
             <h2 className="login-visual-heading">
               Real intelligence
@@ -165,8 +219,17 @@ const Login = () => {
               ))}
             </div>
 
-            <svg className="login-skyline" viewBox="0 0 520 140" fill="none" preserveAspectRatio="none">
-              <path d="M0 140V96h24V70h20v26h18V54h26v42h16V60h30v22h14V40h28v46h12V64h24v32h16V30h30v56h14V80h22v20h20V50h26v50h18V90h30v10H0z" stroke="rgba(255,255,255,0.22)" strokeWidth="1.2" />
+            <svg
+              className="login-skyline"
+              viewBox="0 0 520 140"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0 140V96h24V70h20v26h18V54h26v42h16V60h30v22h14V40h28v46h12V64h24v32h16V30h30v56h14V80h22v20h20V50h26v50h18V90h30v10H0z"
+                stroke="rgba(255,255,255,0.22)"
+                strokeWidth="1.2"
+              />
             </svg>
           </div>
         </div>

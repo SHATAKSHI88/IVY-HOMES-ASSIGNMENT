@@ -6,14 +6,24 @@ const USER_KEY = "ivy_current_user";
 const EXPIRES_AT_KEY = "ivy_token_expires_at";
 
 export const login = async (email, password) => {
+  const cleanEmail = email.trim();
+
+  if (!cleanEmail || !password) {
+    throw new Error("Please enter your email and password.");
+  }
+
   const response = await request("/auth/login", {
     method: "POST",
     auth: false,
     body: {
-      email,
+      email: cleanEmail,
       password,
     },
   });
+
+  if (!response?.access_token) {
+    throw new Error("Login failed. No access token was returned.");
+  }
 
   localStorage.setItem(
     ACCESS_TOKEN_KEY,
@@ -25,6 +35,8 @@ export const login = async (email, password) => {
       REFRESH_TOKEN_KEY,
       response.refresh_token
     );
+  } else {
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
   }
 
   const expiresIn =
@@ -35,13 +47,11 @@ export const login = async (email, password) => {
     String(Date.now() + expiresIn * 1000)
   );
 
-  const user = {
-    email,
-  };
-
   localStorage.setItem(
     USER_KEY,
-    JSON.stringify(user)
+    JSON.stringify({
+      email: cleanEmail,
+    })
   );
 
   return response;
@@ -66,6 +76,11 @@ export const refreshAccessToken = async () => {
       },
     }
   );
+
+  if (!response?.access_token) {
+    logout();
+    throw new Error("Unable to refresh your session.");
+  }
 
   localStorage.setItem(
     ACCESS_TOKEN_KEY,
@@ -109,29 +124,31 @@ export const getCurrentUser = () => {
 };
 
 export const isAuthenticated = () => {
-  return Boolean(getAccessToken());
+  const token = getAccessToken();
+  const expiresAt = getTokenExpiry();
+
+  if (!token) {
+    return false;
+  }
+
+  if (expiresAt && Date.now() >= expiresAt) {
+    return false;
+  }
+
+  return true;
 };
 
 export const logout = () => {
-  localStorage.removeItem(
-    ACCESS_TOKEN_KEY
-  );
-
-  localStorage.removeItem(
-    REFRESH_TOKEN_KEY
-  );
-
-  localStorage.removeItem(
-    EXPIRES_AT_KEY
-  );
-
-  localStorage.removeItem(
-    USER_KEY
-  );
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(EXPIRES_AT_KEY);
+  localStorage.removeItem(USER_KEY);
 };
 
 export const getTokenExpiry = () => {
-  return Number(
-    localStorage.getItem(EXPIRES_AT_KEY)
-  ) || 0;
+  return (
+    Number(
+      localStorage.getItem(EXPIRES_AT_KEY)
+    ) || 0
+  );
 };

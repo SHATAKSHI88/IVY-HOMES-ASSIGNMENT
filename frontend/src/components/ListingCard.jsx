@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../api/auth";
-import {
-  isListingSaved,
-  toggleSavedListing,
-} from "../api/saved";
+import { isListingSaved, toggleSavedListing } from "../api/saved";
 
 const formatPrice = (price) => {
   const value = Number(price);
@@ -52,10 +49,7 @@ const ListingCard = ({ listing }) => {
 
   return (
     <article className="listing-card">
-      <div
-        className="listing-card-image"
-        onClick={openDetails}
-      >
+      <div className="listing-card-image" onClick={openDetails}>
         <div className="listing-image-overlay" />
 
         <span className="listing-type">
@@ -63,11 +57,7 @@ const ListingCard = ({ listing }) => {
         </span>
 
         <button
-          className={
-            saved
-              ? "save-button saved"
-              : "save-button"
-          }
+          className={saved ? "save-button saved" : "save-button"}
           onClick={handleSave}
           aria-label={
             saved
@@ -90,13 +80,11 @@ const ListingCard = ({ listing }) => {
         <div className="listing-card-top">
           <div className="listing-heading">
             <p className="listing-locality">
-              {listing.locality ||
-                "Location unavailable"}
+              {listing.locality || "Location unavailable"}
             </p>
 
             <h2>
-              {listing.apartment_name ||
-                "Property"}
+              {listing.apartment_name || "Property"}
             </h2>
           </div>
         </div>
@@ -115,8 +103,7 @@ const ListingCard = ({ listing }) => {
 
         <div className="listing-meta">
           <span>
-            <strong>{listing.bedroom || "—"}</strong>
-            BHK
+            <strong>{listing.bedroom || "—"}</strong> BHK
           </span>
 
           <span className="meta-divider" />
@@ -124,31 +111,28 @@ const ListingCard = ({ listing }) => {
           <span>
             <strong>
               {listing.carpet_area
-                ? Number(
-                    listing.carpet_area
-                  ).toLocaleString("en-IN")
+                ? Number(listing.carpet_area).toLocaleString("en-IN")
                 : "—"}
-            </strong>
+            </strong>{" "}
             sqft
           </span>
 
           {listing.furnishing && (
             <>
               <span className="meta-divider" />
-
-              <span>
-                {listing.furnishing}
-              </span>
+              <span>{listing.furnishing}</span>
             </>
           )}
         </div>
 
+        {/* View Property */}
         <button
-          className="view-property-button"
+          type="button"
+          className="view-property-button property-view-button"
           onClick={openDetails}
         >
-          View property
-          <span>→</span>
+          <span>View property</span>
+          <span className="property-view-arrow">→</span>
         </button>
       </div>
     </article>
