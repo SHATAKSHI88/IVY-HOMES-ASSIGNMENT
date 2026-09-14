@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { getListingById } from "../api/listings";
-import {
-  isListingSaved,
-  toggleSavedListing,
-} from "../api/saved";
 import { getCurrentUser } from "../api/auth";
+import { isListingSaved, toggleSavedListing } from "../api/saved";
 
 const formatPrice = (price) => {
   const value = Number(price);
@@ -27,57 +24,55 @@ const formatPrice = (price) => {
 };
 
 const ListingDetail = () => {
-  const { listingId } = useParams();
+  const { listingId: id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
+
   const user = getCurrentUser();
 
-  const [listing, setListing] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [listing, setListing] = useState(location.state?.listing || null);
+  const [loading, setLoading] = useState(!location.state?.listing);
   const [error, setError] = useState("");
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(
+    location.state?.listing
+      ? isListingSaved(location.state.listing.listing_id, user)
+      : false
+  );
 
   useEffect(() => {
-    const loadListing = async () => {
+    if (listing) {
+      setSaved(isListingSaved(listing.listing_id, user));
+      return;
+    }
+
+    const fetchListing = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const data = await getListingById(
-          listingId
-        );
+        const response = await getListingById(id);
 
-        setListing(data);
-
-        setSaved(
-          isListingSaved(listingId, user)
-        );
+        setListing(response);
+        setSaved(isListingSaved(response?.listing_id, user));
       } catch (err) {
         console.error(err);
-        setError(
-          err.message ||
-            "Unable to load this property."
-        );
+        setError("Unable to load this property.");
       } finally {
         setLoading(false);
       }
     };
 
-    loadListing();
-  }, [listingId]);
+    fetchListing();
+  }, [id]);
 
   const handleSave = () => {
     if (!listing) return;
 
-    const updated = toggleSavedListing(
-      listing,
-      user
-    );
+    const updated = toggleSavedListing(listing, user);
 
     setSaved(
       updated.some(
-        (item) =>
-          item.listing_id ===
-          listing.listing_id
+        (item) => item.listing_id === listing.listing_id
       )
     );
   };
@@ -88,9 +83,9 @@ const ListingDetail = () => {
         <Navbar />
 
         <main className="detail-page">
-          <div className="loading-state">
-            <div className="spinner" />
-            <p>Loading property...</p>
+          <div className="detail-loading">
+            <div className="loading-spinner" />
+            <p>Loading property details...</p>
           </div>
         </main>
       </>
@@ -103,29 +98,22 @@ const ListingDetail = () => {
         <Navbar />
 
         <main className="detail-page">
-          <div className="detail-error">
-            <p className="eyebrow">
-              PROPERTY NOT FOUND
-            </p>
-
-            <h1>
-              We couldn't load this listing.
-            </h1>
-
+          <section className="detail-error">
+            <div className="empty-icon">⌂</div>
+            <p className="eyebrow">PROPERTY UNAVAILABLE</p>
+            <h1>We couldn't find this property.</h1>
             <p>
-              {error ||
-                "The requested property does not exist."}
+              The listing may have been removed or is temporarily
+              unavailable.
             </p>
 
             <button
-              className="primary-button"
-              onClick={() =>
-                navigate("/listings")
-              }
+              className="collection-card-button"
+              onClick={() => navigate("/listings")}
             >
-              Back to listings
+              ← Back to listings
             </button>
-          </div>
+          </section>
         </main>
       </>
     );
@@ -136,180 +124,174 @@ const ListingDetail = () => {
       <Navbar />
 
       <main className="detail-page">
-        <button
-          className="back-button"
-          onClick={() => navigate(-1)}
-        >
-          ← Back to listings
-        </button>
-
         <section className="detail-hero">
-          <div className="detail-visual">
-            <span>
-              {listing.property_type ||
-                "Residential"}
+          <div className="detail-hero-image">
+            <div className="detail-image-overlay" />
+
+            <span className="detail-property-type">
+              {listing.property_type || "Residential"}
             </span>
 
             {listing.is_live && (
-              <small>LIVE LISTING</small>
+              <span className="detail-live-badge">
+                <span className="live-dot" />
+                Live listing
+              </span>
             )}
+
+            <button
+              className={
+                saved
+                  ? "detail-save-button saved"
+                  : "detail-save-button"
+              }
+              onClick={handleSave}
+              aria-label={
+                saved
+                  ? "Remove from saved listings"
+                  : "Save listing"
+              }
+            >
+              {saved ? "♥" : "♡"}
+            </button>
           </div>
 
-          <div className="detail-summary">
-            <div className="detail-heading">
-              <div>
-                <p className="eyebrow">
-                  {listing.locality ||
-                    "PROPERTY"}
-                </p>
+          <div className="detail-intro">
+            <button
+              className="detail-back-button"
+              onClick={() => navigate("/listings")}
+            >
+              ← Back to listings
+            </button>
 
-                <h1>
-                  {listing.apartment_name ||
-                    "Property"}
-                </h1>
-              </div>
+            <p className="eyebrow">
+              {listing.locality || "PROPERTY DETAILS"}
+            </p>
 
-              <button
-                className={
-                  saved
-                    ? "save-button saved detail-save"
-                    : "save-button detail-save"
-                }
-                onClick={handleSave}
-              >
-                {saved ? "♥" : "♡"}
-              </button>
+            <h1>
+              {listing.apartment_name || "Property"}
+            </h1>
+
+            <div className="detail-price">
+              {formatPrice(listing.price)}
             </div>
 
-            <strong className="detail-price">
-              {formatPrice(listing.price)}
-            </strong>
-
             <p className="detail-location">
-              {listing.locality ||
-                "Location unavailable"}
-              {listing.city
-                ? `, ${listing.city}`
-                : ""}
+              {listing.locality || "Location unavailable"}
             </p>
           </div>
         </section>
 
-        <section className="detail-grid">
-          <div className="detail-panel">
-            <p className="eyebrow">
-              PROPERTY DETAILS
-            </p>
-
-            <div className="detail-spec-grid">
+        <section className="detail-content">
+          <div className="detail-main-card">
+            <div className="detail-section-heading">
               <div>
+                <p className="eyebrow">PROPERTY OVERVIEW</p>
+                <h2>Everything you need to know.</h2>
+              </div>
+            </div>
+
+            <div className="detail-stats-grid">
+              <div className="detail-stat">
                 <span>Bedrooms</span>
                 <strong>
-                  {listing.bedroom || "—"}
+                  {listing.bedroom || "—"} BHK
                 </strong>
               </div>
 
-              <div>
-                <span>Floor</span>
-                <strong>
-                  {listing.floor || "—"}
-                </strong>
-              </div>
-
-              <div>
+              <div className="detail-stat">
                 <span>Carpet area</span>
                 <strong>
                   {listing.carpet_area
                     ? `${Number(
                         listing.carpet_area
-                      ).toLocaleString(
-                        "en-IN"
-                      )} sqft`
+                      ).toLocaleString("en-IN")} sqft`
                     : "—"}
                 </strong>
               </div>
 
-              <div>
-                <span>Super built-up</span>
-                <strong>
-                  {listing.super_built_up_area
-                    ? `${Number(
-                        listing.super_built_up_area
-                      ).toLocaleString(
-                        "en-IN"
-                      )} sqft`
-                    : "—"}
-                </strong>
-              </div>
-
-              <div>
+              <div className="detail-stat">
                 <span>Furnishing</span>
                 <strong>
                   {listing.furnishing || "—"}
                 </strong>
               </div>
 
-              <div>
+              <div className="detail-stat">
                 <span>Property type</span>
                 <strong>
-                  {listing.property_type || "—"}
+                  {listing.property_type || "Residential"}
                 </strong>
               </div>
             </div>
-          </div>
 
-          <div className="detail-panel">
-            <p className="eyebrow">
-              LISTING INFORMATION
-            </p>
-
-            <div className="detail-info">
+            <div className="detail-information">
               <div>
                 <span>Listing ID</span>
+                <strong>{listing.listing_id || "—"}</strong>
+              </div>
+
+              <div>
+                <span>Apartment</span>
                 <strong>
-                  {listing.listing_id}
+                  {listing.apartment_name || "—"}
                 </strong>
               </div>
 
               <div>
-                <span>Posted by</span>
+                <span>Locality</span>
                 <strong>
-                  {listing.posted_by || "—"}
+                  {listing.locality || "—"}
                 </strong>
               </div>
 
               <div>
-                <span>Verification</span>
+                <span>Posted</span>
                 <strong>
-                  {listing.is_verified
-                    ? "Verified"
-                    : "Not verified"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Status</span>
-                <strong>
-                  {listing.is_live
-                    ? "Live"
-                    : "Inactive"}
+                  {listing.posted_date
+                    ? new Date(
+                        listing.posted_date
+                      ).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "—"}
                 </strong>
               </div>
             </div>
           </div>
-        </section>
 
-        {listing.description && (
-          <section className="detail-description">
-            <p className="eyebrow">
-              DESCRIPTION
+          <aside className="detail-side-card">
+            <p className="eyebrow">YOUR SHORTLIST</p>
+
+            <h3>
+              {saved
+                ? "Saved to your shortlist."
+                : "Keep this property in mind."}
+            </h3>
+
+            <p>
+              {saved
+                ? "You can find this property anytime from your saved listings."
+                : "Save this property so you can easily compare it later."}
             </p>
 
-            <h2>About this property</h2>
+            <button
+              className="detail-action-button"
+              onClick={handleSave}
+            >
+              {saved ? "Remove from saved" : "Save property"}
+            </button>
 
-            <p>{listing.description}</p>
-          </section>
-        )}
+            <button
+              className="detail-secondary-button"
+              onClick={() => navigate("/saved")}
+            >
+              View saved properties →
+            </button>
+          </aside>
+        </section>
       </main>
     </>
   );

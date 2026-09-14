@@ -35,23 +35,19 @@ const ListingCard = ({ listing }) => {
   const handleSave = (event) => {
     event.stopPropagation();
 
-    const updated = toggleSavedListing(
-      listing,
-      user
-    );
+    const updated = toggleSavedListing(listing, user);
 
     setSaved(
       updated.some(
-        (item) =>
-          item.listing_id === listing.listing_id
+        (item) => item.listing_id === listing.listing_id
       )
     );
   };
 
   const openDetails = () => {
-    navigate(
-      `/listings/${listing.listing_id}`
-    );
+    navigate(`/listings/${listing.listing_id}`, {
+      state: { listing },
+    });
   };
 
   return (
@@ -60,9 +56,10 @@ const ListingCard = ({ listing }) => {
         className="listing-card-image"
         onClick={openDetails}
       >
+        <div className="listing-image-overlay" />
+
         <span className="listing-type">
-          {listing.property_type ||
-            "Residential"}
+          {listing.property_type || "Residential"}
         </span>
 
         <button
@@ -80,11 +77,18 @@ const ListingCard = ({ listing }) => {
         >
           {saved ? "♥" : "♡"}
         </button>
+
+        {listing.is_live && (
+          <span className="image-live-badge">
+            <span className="live-dot" />
+            Live
+          </span>
+        )}
       </div>
 
       <div className="listing-card-body">
         <div className="listing-card-top">
-          <div>
+          <div className="listing-heading">
             <p className="listing-locality">
               {listing.locality ||
                 "Location unavailable"}
@@ -95,37 +99,47 @@ const ListingCard = ({ listing }) => {
                 "Property"}
             </h2>
           </div>
+        </div>
 
-          {listing.is_live && (
-            <span className="live-badge">
-              Live
+        <div className="listing-price-row">
+          <strong className="listing-price">
+            {formatPrice(listing.price)}
+          </strong>
+
+          {listing.posted_date && (
+            <span className="listing-posted">
+              Recently listed
             </span>
           )}
         </div>
 
-        <strong className="listing-price">
-          {formatPrice(listing.price)}
-        </strong>
-
         <div className="listing-meta">
           <span>
-            {listing.bedroom || "—"} BHK
+            <strong>{listing.bedroom || "—"}</strong>
+            BHK
           </span>
 
+          <span className="meta-divider" />
+
           <span>
-            {listing.carpet_area
-              ? `${Number(
-                  listing.carpet_area
-                ).toLocaleString(
-                  "en-IN"
-                )} sqft`
-              : "Area unavailable"}
+            <strong>
+              {listing.carpet_area
+                ? Number(
+                    listing.carpet_area
+                  ).toLocaleString("en-IN")
+                : "—"}
+            </strong>
+            sqft
           </span>
 
           {listing.furnishing && (
-            <span>
-              {listing.furnishing}
-            </span>
+            <>
+              <span className="meta-divider" />
+
+              <span>
+                {listing.furnishing}
+              </span>
+            </>
           )}
         </div>
 
@@ -134,6 +148,7 @@ const ListingCard = ({ listing }) => {
           onClick={openDetails}
         >
           View property
+          <span>→</span>
         </button>
       </div>
     </article>

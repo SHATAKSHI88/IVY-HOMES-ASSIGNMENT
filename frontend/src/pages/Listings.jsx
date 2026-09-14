@@ -1,175 +1,149 @@
 import { useEffect, useState } from "react";
-import { getListings } from "../api/listings";
-import ListingCard from "../components/ListingCard";
-import Filters from "../components/Filters";
 import Navbar from "../components/Navbar";
-
-const emptyFilters = {
-  locality: "",
-  bhk: "",
-  minPrice: "",
-  maxPrice: "",
-  furnishing: "",
-};
+import Filters from "../components/Filters";
+import ListingCard from "../components/ListingCard";
+import { getListings } from "../api/listings";
 
 const Listings = () => {
   const [listings, setListings] = useState([]);
-  const [filters, setFilters] = useState(emptyFilters);
-
+  const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-
   const [error, setError] = useState("");
 
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [total, setTotal] = useState(0);
-
-  const loadListings = async ({
-    newFilters = filters,
-    newOffset = 0,
-    append = false,
-  } = {}) => {
+  const fetchListings = async (activeFilters = {}) => {
     try {
+      setLoading(true);
       setError("");
 
-      if (append) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
-
-      const data = await getListings({
-        offset: newOffset,
+      const response = await getListings({
+        offset: 0,
         limit: 50,
-        locality: newFilters.locality,
-        bhk: newFilters.bhk,
-        minPrice: newFilters.minPrice,
-        maxPrice: newFilters.maxPrice,
-        furnishing: newFilters.furnishing,
+        locality: activeFilters.locality || "",
+        bhk: activeFilters.bhk || "",
+        minPrice: activeFilters.minPrice || "",
+        maxPrice: activeFilters.maxPrice || "",
+        furnishing: activeFilters.furnishing || "",
       });
 
-      const newResults = data.results || [];
-
-      setListings((current) =>
-        append ? [...current, ...newResults] : newResults
-      );
-
-      setTotal(Number(data.total) || 0);
-      setOffset(newOffset);
-      setHasMore(Boolean(data.has_more));
+      setListings(response?.results || []);
     } catch (err) {
-      console.error("Listings error:", err);
-
-      setError(
-        err.message || "Unable to load listings."
-      );
-
-      if (!append) {
-        setListings([]);
-        setTotal(0);
-        setHasMore(false);
-      }
+      console.error(err);
+      setError("Failed to fetch listings");
+      setListings([]);
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   };
 
   useEffect(() => {
-    loadListings({
-      newFilters: emptyFilters,
-      newOffset: 0,
-      append: false,
-    });
-  }, []);
+    fetchListings(filters);
+  }, [filters]);
 
-  const handleApply = () => {
-    loadListings({
-      newFilters: filters,
-      newOffset: 0,
-      append: false,
-    });
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
   };
 
-  const handleClear = () => {
-    setFilters({ ...emptyFilters });
-
-    loadListings({
-      newFilters: emptyFilters,
-      newOffset: 0,
-      append: false,
-    });
-  };
-
-  const handleLoadMore = () => {
-    if (loadingMore || !hasMore) {
-      return;
-    }
-
-    loadListings({
-      newFilters: filters,
-      newOffset: offset + 50,
-      append: true,
-    });
+  const handleClearFilters = () => {
+    setFilters({});
   };
 
   return (
     <>
       <Navbar />
 
-      <main className="dashboard-page">
-        <header className="dashboard-header">
-          <div>
-            <p className="eyebrow">IVY HOMES</p>
+      <main className="listings-page">
 
-            <h1>Find your next home.</h1>
+        {/* HERO */}
+        <section className="discovery-section">
 
-            <p className="dashboard-subtitle">
-              Explore residential properties across
-              leading neighbourhoods.
+          <div className="discovery-copy">
+            <p className="eyebrow">PROPERTY DISCOVERY</p>
+
+            <h1>
+              Find a place
+              <br />
+              that feels like <em>home.</em>
+            </h1>
+
+            <p className="discovery-description">
+              Browse residential properties by locality, budget,
+              bedrooms, and furnishing preference.
             </p>
+
+            <div className="discovery-stats">
+              <div className="discovery-stat">
+                <strong>4,415</strong>
+                <span>properties</span>
+              </div>
+
+              <div className="discovery-stat">
+                <strong>Multiple</strong>
+                <span>neighbourhoods</span>
+              </div>
+
+              <div className="discovery-stat">
+                <strong>Updated</strong>
+                <span>listings</span>
+              </div>
+            </div>
           </div>
 
-          <div className="results-count">
-            <strong>
-              {total.toLocaleString("en-IN")}
-            </strong>
+          <Filters
+            onApply={handleApplyFilters}
+            onClear={handleClearFilters}
+          />
 
-            <span>properties</span>
+        </section>
+
+        {/* RESULTS */}
+        <section className="listings-results">
+
+          <div className="results-heading">
+            <div>
+              <p className="eyebrow">AVAILABLE HOMES</p>
+
+              <h2>
+                {loading
+                  ? "Finding properties..."
+                  : `${listings.length} properties found`}
+              </h2>
+            </div>
+
+            {!loading && listings.length > 0 && (
+              <span className="results-status">
+                Showing latest listings
+              </span>
+            )}
           </div>
-        </header>
 
-        <Filters
-          filters={filters}
-          setFilters={setFilters}
-          onApply={handleApply}
-          onClear={handleClear}
-        />
+          {loading && (
+            <div className="listings-loading">
+              <div className="loading-spinner" />
+              <p>Finding properties for you...</p>
+            </div>
+          )}
 
-        {error && (
-          <div className="error-banner">
-            {error}
-          </div>
-        )}
+          {!loading && error && (
+            <div className="listings-error">
+              <span>!</span>
+              <p>{error}</p>
+            </div>
+          )}
 
-        {loading ? (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Loading properties...</p>
-          </div>
-        ) : listings.length === 0 ? (
-          <div className="empty-state">
-            <h2>No properties found</h2>
+          {!loading && !error && listings.length === 0 && (
+            <div className="empty-listings">
+              <div className="empty-icon">⌂</div>
 
-            <p>
-              Try changing your filters to see more
-              listings.
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="listings-grid">
+              <h3>No properties found</h3>
+
+              <p>
+                Try adjusting your filters to discover more homes.
+              </p>
+            </div>
+          )}
+
+          {!loading && !error && listings.length > 0 && (
+            <div className="listing-grid">
               {listings.map((listing) => (
                 <ListingCard
                   key={listing.listing_id}
@@ -177,29 +151,9 @@ const Listings = () => {
                 />
               ))}
             </div>
+          )}
 
-            {hasMore && (
-              <div className="load-more-container">
-                <button
-                  className="load-more-button"
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                >
-                  {loadingMore
-                    ? "Loading..."
-                    : "Load more properties"}
-                </button>
-
-                <p>
-                  Showing{" "}
-                  {listings.length.toLocaleString("en-IN")}{" "}
-                  of{" "}
-                  {total.toLocaleString("en-IN")}
-                </p>
-              </div>
-            )}
-          </>
-        )}
+        </section>
       </main>
     </>
   );

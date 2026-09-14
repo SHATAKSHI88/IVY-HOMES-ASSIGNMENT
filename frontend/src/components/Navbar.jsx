@@ -1,94 +1,70 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { getCurrentUser, logout } from "../api/auth";
+import { logout } from "../api/auth";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const user = getCurrentUser();
 
   const handleLogout = () => {
     logout();
-    navigate("/login", { replace: true });
+    navigate("/login");
   };
 
+  const getNavClass = ({ isActive }) =>
+    isActive ? "navbar-link active" : "navbar-link";
+
   return (
-    <nav className="navbar">
+    <header className="site-navbar">
       <div className="navbar-inner">
 
         <NavLink to="/listings" className="navbar-brand">
-          <span className="navbar-logo">I</span>
+          <span className="navbar-brand-mark">I</span>
 
-          <span>
-            <strong>Ivy Homes</strong>
-            <small>Property Intelligence</small>
+          <span className="navbar-brand-text">
+            <strong>IVY</strong>
+            <span>HOMES</span>
           </span>
         </NavLink>
 
-        <div className="navbar-links">
-
-          <NavLink
-            to="/listings"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
-            Listings
+        <nav className="navbar-navigation">
+          <NavLink to="/listings" className={getNavClass}>
+            Explore
           </NavLink>
 
-          <NavLink
-            to="/rentals"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
+          <NavLink to="/rentals" className={getNavClass}>
             Rentals
           </NavLink>
 
-          <NavLink
-            to="/projects"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
+          <NavLink to="/projects" className={getNavClass}>
             Projects
           </NavLink>
 
-          <NavLink
-            to="/saved"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
+          <NavLink to="/saved" className={getNavClass}>
             Saved
           </NavLink>
 
-          <NavLink
-            to="/insights"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
+          <NavLink to="/insights" className={getNavClass}>
             Insights
           </NavLink>
+        </nav>
 
-        </div>
-
-        <div className="navbar-user">
-
-          <span className="user-email">
-            {user?.email || "User"}
-          </span>
+        <div className="navbar-actions">
+          <NavLink to="/saved" className="navbar-shortlist">
+            <span className="navbar-heart">♡</span>
+            <span>Shortlist</span>
+          </NavLink>
 
           <button
-            className="logout-button"
+            type="button"
+            className="navbar-logout"
             onClick={handleLogout}
           >
             Logout
+            <span className="navbar-logout-arrow">↗</span>
           </button>
-
         </div>
 
       </div>
-    </nav>
+    </header>
   );
 };
 

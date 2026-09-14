@@ -1,200 +1,508 @@
 import Navbar from "../components/Navbar";
 
 const Insights = () => {
-  const metrics = [
-    {
-      label: "Total listings",
-      value: "4,700",
-      description: "Records retrieved from the listings API",
-    },
-    {
-      label: "Active listings",
-      value: "3,722",
-      description: "Listings currently marked as live",
-    },
-    {
-      label: "Unique properties",
-      value: "4,699",
-      description: "One apparent duplicate physical property found",
-    },
-    {
-      label: "7-day listings",
-      value: "149",
-      description: "Posted between Sep 3 and Sep 10, 2026",
-    },
-  ];
-
-  const findings = [
-    {
-      number: "01",
-      title: "Listing completeness needs attention",
-      value: "978",
-      description:
-        "Records in the downloaded listing dataset were marked inactive, despite the documentation describing the endpoint as active-only.",
-    },
-    {
-      number: "02",
-      title: "Project inventory is inconsistent",
-      value: "392",
-      description:
-        "Project records have a reported listing count that does not match the independently counted listings for that project.",
-    },
-    {
-      number: "03",
-      title: "Potential fake listings detected",
-      value: "8",
-      description:
-        "Live listings with unusually low positive prices were identified as likely enquiry-bait records.",
-    },
-    {
-      number: "04",
-      title: "Corrupt prices detected",
-      value: "8",
-      description:
-        "Eight listing records contain negative prices and were excluded from price-based analysis.",
-    },
-  ];
-
   return (
     <>
       <Navbar />
 
       <main className="insights-page">
-        <header className="insights-header">
-          <div>
+
+        {/* =========================
+            HERO
+        ========================== */}
+        <section className="insights-hero">
+          <div className="insights-hero-copy">
             <p className="eyebrow">MARKET INTELLIGENCE</p>
 
-            <h1>What the data is telling us.</h1>
+            <h1>
+              Data that helps you
+              <em> see the market.</em>
+            </h1>
 
-            <p>
-              A concise view of the property dataset,
-              anomalies and signals discovered during API
+            <p className="insights-hero-description">
+              A concise view of the property dataset, market patterns,
+              data-quality findings, and the signals discovered during
               analysis.
             </p>
           </div>
 
-          <div className="insight-source">
-            <span>DATA SOURCE</span>
-            <strong>Ivy Homes API</strong>
-            <small>Reference date · 10 Sep 2026</small>
+          <div className="insights-hero-card">
+            <span className="insights-card-label">DATASET</span>
+
+            <strong>4,700</strong>
+
+            <span>property records analysed</span>
+
+            <div className="insights-card-line" />
+
+            <div className="insights-card-meta">
+              <span>Live records</span>
+              <strong>3,722</strong>
+            </div>
           </div>
-        </header>
-
-        <section className="metric-grid">
-          {metrics.map((metric) => (
-            <article
-              className="metric-card"
-              key={metric.label}
-            >
-              <span>{metric.label}</span>
-
-              <strong>{metric.value}</strong>
-
-              <p>{metric.description}</p>
-            </article>
-          ))}
         </section>
 
-        <section className="insights-section">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">DATA QUALITY</p>
 
-              <h2>Signals worth investigating</h2>
+        {/* =========================
+            KEY METRICS
+        ========================== */}
+        <section className="insights-section">
+          <div className="insights-section-heading">
+            <div>
+              <p className="eyebrow">AT A GLANCE</p>
+
+              <h2>
+                The numbers behind the market.
+              </h2>
             </div>
 
-            <span className="finding-count">
-              4 priority findings
+            <span className="insights-section-note">
+              Verified from the API dataset
             </span>
           </div>
 
-          <div className="findings-grid">
-            {findings.map((finding) => (
-              <article
-                className="finding-card"
-                key={finding.number}
-              >
-                <div className="finding-number">
-                  {finding.number}
-                </div>
+          <div className="metric-grid">
 
-                <div className="finding-content">
-                  <h3>{finding.title}</h3>
+            <article className="metric-card metric-card-featured">
+              <span className="metric-icon">⌂</span>
 
-                  <strong>{finding.value}</strong>
+              <span className="metric-label">
+                Total properties
+              </span>
 
-                  <p>{finding.description}</p>
-                </div>
-              </article>
-            ))}
+              <strong>4,700</strong>
+
+              <p>
+                Records retrieved during the analysis.
+              </p>
+            </article>
+
+
+            <article className="metric-card">
+              <span className="metric-icon">◉</span>
+
+              <span className="metric-label">
+                Active listings
+              </span>
+
+              <strong>3,722</strong>
+
+              <p>
+                Properties marked as currently live.
+              </p>
+            </article>
+
+
+            <article className="metric-card">
+              <span className="metric-icon">◇</span>
+
+              <span className="metric-label">
+                Unique properties
+              </span>
+
+              <strong>4,699</strong>
+
+              <p>
+                Unique property identities detected.
+              </p>
+            </article>
+
+
+            <article className="metric-card">
+              <span className="metric-icon">↗</span>
+
+              <span className="metric-label">
+                Last 7 days
+              </span>
+
+              <strong>149</strong>
+
+              <p>
+                Listings posted during the latest seven-day window.
+              </p>
+            </article>
+
           </div>
         </section>
 
-        <section className="insights-bottom">
-          <div className="insight-panel">
+
+        {/* =========================
+            MARKET SNAPSHOT
+        ========================== */}
+        <section className="market-snapshot-section">
+
+          <div className="snapshot-heading">
             <p className="eyebrow">MARKET SNAPSHOT</p>
 
-            <h2>2-BHK pricing</h2>
-
-            <div className="big-stat">
-              ₹21,040
-              <span>/ sqft</span>
-            </div>
+            <h2>
+              Three signals worth
+              <em> noticing.</em>
+            </h2>
 
             <p>
-              Mean price per carpet sqft across live
-              2-bedroom listing records after excluding
-              corrupt and fake records.
+              The dataset reveals useful patterns across individual
+              listings, rental inventory, and large residential projects.
             </p>
           </div>
 
-          <div className="insight-panel">
-            <p className="eyebrow">PROJECT MARKET</p>
 
-            <h2>Highest project ceiling</h2>
+          <div className="snapshot-grid">
 
-            <div className="big-stat">
-              ₹99.80
-              <span>Cr</span>
-            </div>
+            <article className="snapshot-card">
+              <div className="snapshot-number">
+                01
+              </div>
 
-            <p>
-              Project P10068 has the highest reported
-              maximum project price in the dataset.
-            </p>
-          </div>
+              <span className="snapshot-tag">
+                RESALE MARKET
+              </span>
 
-          <div className="insight-panel">
-            <p className="eyebrow">RENTAL MARKET</p>
+              <h3>
+                2-BHK price density
+              </h3>
 
-            <h2>Yelahanka rental volume</h2>
+              <strong>
+                ₹21,040.17
+              </strong>
 
-            <div className="big-stat">
-              ₹57.70L
-            </div>
+              <span className="snapshot-unit">
+                per sqft
+              </span>
 
-            <p>
-              Combined monthly rent across all rental
-              records assigned to Yelahanka.
-            </p>
+              <p>
+                Mean individual property price per carpet-area square
+                foot for live 2-BHK listings after excluding anomalous
+                records.
+              </p>
+
+              <div className="snapshot-bar">
+                <span style={{ width: "72%" }} />
+              </div>
+            </article>
+
+
+            <article className="snapshot-card">
+              <div className="snapshot-number">
+                02
+              </div>
+
+              <span className="snapshot-tag">
+                PROJECT MARKET
+              </span>
+
+              <h3>
+                Highest project ceiling
+              </h3>
+
+              <strong>
+                ₹99.80 Cr
+              </strong>
+
+              <span className="snapshot-unit">
+                maximum project price
+              </span>
+
+              <p>
+                The highest maximum project price found in the dataset,
+                associated with project P10068.
+              </p>
+
+              <div className="snapshot-bar">
+                <span style={{ width: "92%" }} />
+              </div>
+            </article>
+
+
+            <article className="snapshot-card">
+              <div className="snapshot-number">
+                03
+              </div>
+
+              <span className="snapshot-tag">
+                RENTAL MARKET
+              </span>
+
+              <h3>
+                Yelahanka rental value
+              </h3>
+
+              <strong>
+                ₹57.70 L
+              </strong>
+
+              <span className="snapshot-unit">
+                combined listed rent
+              </span>
+
+              <p>
+                Total rental value across the Yelahanka rental records
+                returned during the analysis.
+              </p>
+
+              <div className="snapshot-bar">
+                <span style={{ width: "58%" }} />
+              </div>
+            </article>
+
           </div>
         </section>
 
-        <section className="methodology-card">
-          <div>
-            <p className="eyebrow">METHODOLOGY</p>
 
-            <h2>Built from observed API behaviour</h2>
+        {/* =========================
+            DATA QUALITY
+        ========================== */}
+        <section className="insights-section findings-section">
+
+          <div className="insights-section-heading">
+            <div>
+              <p className="eyebrow">
+                DATA QUALITY
+              </p>
+
+              <h2>
+                What needed a closer look.
+              </h2>
+            </div>
+
+            <span className="quality-badge">
+              4 findings
+            </span>
+          </div>
+
+
+          <div className="findings-grid">
+
+            <article className="finding-card">
+              <div className="finding-top">
+                <span className="finding-index">
+                  01
+                </span>
+
+                <span className="finding-severity warning">
+                  REVIEW
+                </span>
+              </div>
+
+              <h3>
+                Inactive inventory
+              </h3>
+
+              <strong>
+                978
+              </strong>
+
+              <p>
+                Records retrieved from the API were not marked as live,
+                despite the documented active-only expectation.
+              </p>
+            </article>
+
+
+            <article className="finding-card">
+              <div className="finding-top">
+                <span className="finding-index">
+                  02
+                </span>
+
+                <span className="finding-severity warning">
+                  REVIEW
+                </span>
+              </div>
+
+              <h3>
+                Project inventory mismatch
+              </h3>
+
+              <strong>
+                392
+              </strong>
+
+              <p>
+                Projects reported 392 listings in aggregate while the
+                retrieved project dataset contained a different count.
+              </p>
+            </article>
+
+
+            <article className="finding-card">
+              <div className="finding-top">
+                <span className="finding-index">
+                  03
+                </span>
+
+                <span className="finding-severity critical">
+                  ANOMALY
+                </span>
+              </div>
+
+              <h3>
+                Suspicious price records
+              </h3>
+
+              <strong>
+                8
+              </strong>
+
+              <p>
+                Extremely low positive-price records were identified
+                and excluded from the relevant analysis.
+              </p>
+            </article>
+
+
+            <article className="finding-card">
+              <div className="finding-top">
+                <span className="finding-index">
+                  04
+                </span>
+
+                <span className="finding-severity critical">
+                  ANOMALY
+                </span>
+              </div>
+
+              <h3>
+                Negative-price records
+              </h3>
+
+              <strong>
+                8
+              </strong>
+
+              <p>
+                Listings containing negative prices were identified
+                as corrupt and excluded from calculations.
+              </p>
+            </article>
+
+          </div>
+        </section>
+
+
+        {/* =========================
+            METHODOLOGY
+        ========================== */}
+        <section className="methodology-section">
+
+          <div className="methodology-intro">
+
+            <p className="eyebrow">
+              METHODOLOGY
+            </p>
+
+            <h2>
+              Analysis with
+              <em> precision.</em>
+            </h2>
+
+            <p>
+              The analysis prioritised correctness over blindly trusting
+              documented API behaviour. Retrieved data was inspected,
+              filtered, deduplicated, and validated before calculating
+              market metrics.
+            </p>
+
+          </div>
+
+
+          <div className="methodology-card">
+
+            <div className="method-step">
+              <span>01</span>
+
+              <div>
+                <h3>
+                  Retrieve
+                </h3>
+
+                <p>
+                  Pulled paginated records from listings, rentals,
+                  and projects endpoints.
+                </p>
+              </div>
+            </div>
+
+
+            <div className="method-step">
+              <span>02</span>
+
+              <div>
+                <h3>
+                  Validate
+                </h3>
+
+                <p>
+                  Compared API behaviour and response fields against
+                  the supplied documentation.
+                </p>
+              </div>
+            </div>
+
+
+            <div className="method-step">
+              <span>03</span>
+
+              <div>
+                <h3>
+                  Clean
+                </h3>
+
+                <p>
+                  Removed corrupt and suspicious records from
+                  calculations while preserving the original dataset.
+                </p>
+              </div>
+            </div>
+
+
+            <div className="method-step">
+              <span>04</span>
+
+              <div>
+                <h3>
+                  Interpret
+                </h3>
+
+                <p>
+                  Converted the cleaned data into concise market
+                  signals and actionable findings.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* =========================
+            FOOTER NOTE
+        ========================== */}
+        <section className="insights-footer-note">
+
+          <div>
+            <span className="footer-mark">
+              I
+            </span>
+
+            <div>
+              <strong>
+                IVY HOMES
+              </strong>
+
+              <span>
+                Property intelligence, made clearer.
+              </span>
+            </div>
           </div>
 
           <p>
-            These insights are calculated from the
-            records retrieved directly from the Ivy Homes
-            API. Where the API documentation conflicted
-            with observed behaviour, the running API was
-            treated as the source of truth.
+            Analysis prioritises data accuracy,
+            transparency, and reproducibility.
           </p>
+
         </section>
+
       </main>
     </>
   );
