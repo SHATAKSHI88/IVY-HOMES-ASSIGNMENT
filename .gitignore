@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+node_modules/
+__pycache__/
+*.pyc
+all_listings.json
+all_projects.json
+all_rentals.json
