@@ -1,0 +1,158 @@
+{
+  "answers": {
+    "q1_total_listing_records": 4700,
+    "q2_unique_physical_properties": 4699,
+    "q3_active_listings": 3722,
+    "q4_corrupt_listing_ids": [
+      "100-1002346",
+      "DWE-1001165",
+      "DWE-1001183",
+      "DWE-1001909",
+      "SQU-1000979",
+      "SQU-1002843",
+      "ZER-1001207",
+      "ZER-1002632"
+    ],
+    "q5_yelahanka_monthly_rent_sum": 5769800,
+    "q6_mean_price_per_carpet_sqft": 21040.17,
+    "q7_highest_price_project": {
+      "project_id": "P10068",
+      "price_max_inr": 998000000
+    },
+    "q8_listings_posted_last_7_days": 149,
+    "q9_fake_listing_ids": [
+      "100-1002501",
+      "DWE-1002631",
+      "DWE-1003102",
+      "MAG-1003492",
+      "SQU-1001431",
+      "SQU-1003524",
+      "ZER-1003652",
+      "ZER-1003813"
+    ],
+    "q10_projects_with_wrong_listing_count": 392
+  },
+  "findings": [
+  {
+    "object": "/auth/login",
+    "discrepancy": "The documented token lifetime is 86400 seconds, but the actual login response returned an access token with expires_in=900 seconds. The API also provides a refresh endpoint.",
+    "endpoint": "/auth/login",
+    "category": "auth",
+    "documented": "Login documentation states expires_in=86400 seconds.",
+    "actual": "Observed expires_in=900 seconds; /auth/refresh is available.",
+    "how_found": "Logged in with valid API credentials and inspected the JSON response.",
+    "impact": "Clients relying on the documented 24-hour lifetime may unexpectedly lose authentication after approximately 15 minutes.",
+    "evidence": "Observed login response returned expires_in=900."
+  },
+  {
+    "object": "/v1/listings",
+    "discrepancy": "The documented pagination model says page/limit with a maximum limit of 200, but the actual response uses offset/limit and enforced a maximum effective page size of 50.",
+    "endpoint": "/v1/listings",
+    "category": "pagination",
+    "documented": "Documentation describes page/limit pagination and maximum limit 200.",
+    "actual": "Responses contain offset, count and has_more; requesting limit=200 returned only 50 records.",
+    "how_found": "Requested /v1/listings with limit=200 and offset=0 and inspected the response.",
+    "impact": "A client implementing documented page-based pagination can miss records or paginate incorrectly.",
+    "evidence": "Request limit=200 returned Limit=50, Offset=0, Count=50, Total=4415, Has More=true."
+  },
+  {
+    "object": "/v1/listings",
+    "discrepancy": "The documentation says the endpoint returns active sale listings only, but the returned dataset contained inactive records.",
+    "endpoint": "/v1/listings",
+    "category": "completeness",
+    "documented": "Inactive listings are excluded.",
+    "actual": "The downloaded dataset contained 978 records with is_live=false.",
+    "how_found": "Downloaded all listing records and counted the is_live field.",
+    "impact": "Consumers may incorrectly assume every returned listing is active.",
+    "evidence": "4700 retrieved listing records included 978 non-live records."
+  },
+  {
+    "object": "/v1/listings",
+    "discrepancy": "The reported total did not equal the number of records retrievable through pagination.",
+    "endpoint": "/v1/listings",
+    "category": "completeness",
+    "documented": "Collection response reports the total number of records.",
+    "actual": "The API reported total=4415, while offset pagination retrieved 4700 records.",
+    "how_found": "Paginated from offset 0 until has_more became false and counted every returned record.",
+    "impact": "The reported total cannot safely be used as the complete dataset size.",
+    "evidence": "Reported total=4415; independently retrieved 4700 listing records."
+  },
+  {
+    "object": "/v1/projects",
+    "discrepancy": "The reported total did not equal the number of records retrievable through pagination.",
+    "endpoint": "/v1/projects",
+    "category": "completeness",
+    "documented": "Collection response reports the total number of project records.",
+    "actual": "The API reported total=488, while pagination retrieved 520 records.",
+    "how_found": "Paginated through the endpoint until has_more became false and counted the returned records.",
+    "impact": "Consumers relying on total for completeness may undercount projects.",
+    "evidence": "Reported total=488; independently retrieved 520 project records."
+  },
+  {
+    "object": "/v1/rentals",
+    "discrepancy": "The reported total did not equal the number of records retrievable through pagination.",
+    "endpoint": "/v1/rentals",
+    "category": "completeness",
+    "documented": "Collection response reports the total number of rental records.",
+    "actual": "The API reported total=1785, while pagination retrieved 1900 records.",
+    "how_found": "Paginated through the endpoint until has_more became false and counted the returned records.",
+    "impact": "Consumers relying on total for completeness may undercount rentals.",
+    "evidence": "Reported total=1785; independently retrieved 1900 rental records."
+  },
+  {
+    "object": "/v1/projects",
+    "discrepancy": "Project maximum prices are documented as INR amounts, but the actual values are crore-scale numbers.",
+    "endpoint": "/v1/projects",
+    "category": "units",
+    "documented": "Project price_min and price_max are documented as INR.",
+    "actual": "Values such as price_max=99.8 occur in the API; this corresponds to ₹998000000 when interpreted as crore.",
+    "how_found": "Inspected project price fields and compared their scale with the listing prices and the assignment's INR requirement.",
+    "impact": "Treating 99.8 as ₹99.80 instead of ₹99.8 crore produces a ten-million-fold scale error.",
+    "evidence": "P10068 has price_max=99.8; converted answer is price_max_inr=998000000."
+  },
+  {
+    "object": "/v1/projects",
+    "discrepancy": "The project's reported total_listings disagreed with the number of listing records having that project_id.",
+    "endpoint": "/v1/projects",
+    "category": "consistency",
+    "documented": "Project total_listings should agree with the listings endpoint.",
+    "actual": "392 of 520 downloaded project records had a reported total_listings value different from the independently counted listings.",
+    "how_found": "Grouped listing records by project_id and compared those counts with each project's total_listings field.",
+    "impact": "Project-level listing counts cannot be treated as consistent with the listings dataset.",
+    "evidence": "392/520 project records had mismatched reported versus observed listing counts."
+  },
+  {
+    "object": "/v1/listings",
+    "discrepancy": "Eight listing records contain negative prices.",
+    "endpoint": "/v1/listings",
+    "category": "data_quality",
+    "documented": "Listing price is a monetary INR value.",
+    "actual": "Eight records have price values below zero.",
+    "how_found": "Scanned every listing price for values less than zero.",
+    "impact": "Negative sale prices are invalid and can corrupt price filtering, sorting and analytics.",
+    "evidence": "Corrupt IDs: 100-1002346, DWE-1001165, DWE-1001183, DWE-1001909, SQU-1000979, SQU-1002843, ZER-1001207, ZER-1002632."
+  },
+  {
+    "object": "/v1/listings",
+    "discrepancy": "Eight live listing records have implausibly low positive prices and appear to be fake bait listings.",
+    "endpoint": "/v1/listings",
+    "category": "fraud",
+    "documented": "No documented exception describes this price pattern.",
+    "actual": "Eight records are live with positive prices below ₹100000 despite otherwise normal property records.",
+    "how_found": "Scanned prices below ₹100000, inspected their live status and compared their property fields and descriptions.",
+    "impact": "Such listings can distort market-price analytics and potentially generate misleading enquiries.",
+    "evidence": "Fake IDs: 100-1002501, DWE-1002631, DWE-1003102, MAG-1003492, SQU-1001431, SQU-1003524, ZER-1003652, ZER-1003813."
+  },
+  {
+    "object": "/v1/listings",
+    "discrepancy": "Two listing records appear to describe the same physical property despite having different listing IDs.",
+    "endpoint": "/v1/listings",
+    "category": "duplicates",
+    "documented": "Documentation states each listing represents a unique physical property.",
+    "actual": "Two records share the same apartment, locality, BHK, floor, carpet area and super built-up area.",
+    "how_found": "Grouped listings using property attributes and manually inspected the resulting duplicate pair.",
+    "impact": "Property-level counts can be inflated when the same physical property is represented by multiple records.",
+    "evidence": "100-1003687 and MAG-1004174 both describe Aparna Park, electronic city, 2 BHK, floor 1, carpet 743 sqft and super built-up 955 sqft."
+  }
+]
+}
